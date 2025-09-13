@@ -55,8 +55,57 @@ class LaserPowerGUI:
         self.manual_measurement_active = False
         
         self.setup_gui()
+        self.auto_connect_instruments()
         self.update_instrument_status()
-    
+
+    def auto_connect_instruments(self):
+        """Automatically attempt to connect to instruments on startup."""
+        # Try to connect power meter automatically
+        try:
+            # Provide explicit path to DLL folder
+            dll_path = os.path.join(os.path.dirname(__file__),
+                                   'Python-Driver-for-Thorlabs-power-meter',
+                                   'Thorlabs_DotNet_dll', '')
+            deviceList = ThorlabsPowerMeter.listDevices(libraryPath=dll_path)
+
+            if deviceList.resourceCount > 0:
+                self.power_meter = deviceList.connect(deviceList.resourceName[0])
+                if self.power_meter is not None:
+                    # Configure power meter
+                    self.power_meter.getSensorInfo()
+                    self.power_meter.setWaveLength(1550)
+                    self.power_meter.setPowerAutoRange(True)
+                    self.power_meter.setAverageTime(0.1)
+                    print(f"Auto-connected to power meter: {self.power_meter.sensorName}")
+        except Exception as e:
+            print(f"Auto-connect power meter failed: {e}")
+
+        # Try to connect laser automatically
+        try:
+            from pumplaser import list_visa_resources
+            visa_resources = list_visa_resources()
+            potential_lasers = [r for r in visa_resources if 'USB0::0x1313::0x804F' in r]
+
+            if potential_lasers:
+                # Try default address first
+                target_address = "USB0::0x1313::0x804F::M01093719::0::INSTR"
+                if target_address in potential_lasers:
+                    laser_addr = target_address
+                else:
+                    laser_addr = potential_lasers[0]
+
+                from pumplaser import PumpLaser
+                self.laser = PumpLaser(laser_addr)
+                if self.laser.connect():
+                    # Initialize to safe state
+                    self.laser.set_current(0)
+                    self.laser.set_output(False)
+                    print(f"Auto-connected to laser: {laser_addr}")
+                else:
+                    self.laser = None
+        except Exception as e:
+            print(f"Auto-connect laser failed: {e}")
+
     def setup_gui(self):
         """Create the GUI layout."""
         # Add device status header block
@@ -398,7 +447,11 @@ class LaserPowerGUI:
         if self.power_meter:
             # Get the actual device address
             try:
-                deviceList = ThorlabsPowerMeter.listDevices()
+                # Provide explicit path to DLL folder
+                dll_path = os.path.join(os.path.dirname(__file__),
+                                       'Python-Driver-for-Thorlabs-power-meter',
+                                       'Thorlabs_DotNet_dll', '')
+                deviceList = ThorlabsPowerMeter.listDevices(libraryPath=dll_path)
                 if deviceList.resourceCount > 0:
                     pm_address = deviceList.resourceName[0]
                     self.pm_address_var.set(pm_address)
@@ -460,8 +513,12 @@ class LaserPowerGUI:
         try:
             self.info_text.insert(tk.END, "Connecting to power meter...\n")
             self.info_text.see(tk.END)
-            
-            deviceList = ThorlabsPowerMeter.listDevices()
+
+            # Provide explicit path to DLL folder
+            dll_path = os.path.join(os.path.dirname(__file__),
+                                   'Python-Driver-for-Thorlabs-power-meter',
+                                   'Thorlabs_DotNet_dll', '')
+            deviceList = ThorlabsPowerMeter.listDevices(libraryPath=dll_path)
             
             if deviceList.resourceCount == 0:
                 messagebox.showerror("Error", "No power meter devices found")
