@@ -122,6 +122,9 @@ class LaserPowerGUIDemo:
                              bg='orange', fg='black', font=('Arial', 12, 'bold'))
         demo_label.pack(pady=5)
         
+        # Add device status header block
+        self.setup_status_header()
+        
         # Create main notebook for tabs
         notebook = ttk.Notebook(self.root)
         notebook.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
@@ -226,6 +229,69 @@ class LaserPowerGUIDemo:
         
         # Populate table with target currents
         self.populate_sweep_table()
+    
+    def setup_status_header(self):
+        """Setup the device status header block (demo version)."""
+        # Main status frame
+        status_header = ttk.LabelFrame(self.root, text="Device Status", padding=10)
+        status_header.pack(fill=tk.X, padx=5, pady=5)
+        
+        # Create two-column layout
+        left_frame = ttk.Frame(status_header)
+        left_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        
+        right_frame = ttk.Frame(status_header)
+        right_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True, padx=(20, 0))
+        
+        # Power Meter Status (Demo)
+        pm_title = ttk.Label(left_frame, text="Power Meter", font=('Arial', 10, 'bold'))
+        pm_title.grid(row=0, column=0, sticky=tk.W, pady=(0, 5))
+        
+        ttk.Label(left_frame, text="Address:").grid(row=1, column=0, sticky=tk.W)
+        pm_address_label = ttk.Label(left_frame, text="DEMO_POWER_METER::SIMULATED", 
+                                    font=('Courier', 9), foreground='purple')
+        pm_address_label.grid(row=1, column=1, sticky=tk.W, padx=(5, 0))
+        
+        ttk.Label(left_frame, text="Status:").grid(row=2, column=0, sticky=tk.W)
+        pm_status_label = ttk.Label(left_frame, text="Connected (Simulated)", 
+                                   font=('Arial', 9, 'bold'), foreground='green')
+        pm_status_label.grid(row=2, column=1, sticky=tk.W, padx=(5, 0))
+        
+        ttk.Label(left_frame, text="Device:").grid(row=3, column=0, sticky=tk.W)
+        pm_device_label = ttk.Label(left_frame, text="S132C (191219201)", 
+                                   font=('Arial', 9))
+        pm_device_label.grid(row=3, column=1, sticky=tk.W, padx=(5, 0))
+        
+        # Laser Status (Demo)
+        laser_title = ttk.Label(right_frame, text="Pump Laser", font=('Arial', 10, 'bold'))
+        laser_title.grid(row=0, column=0, sticky=tk.W, pady=(0, 5))
+        
+        ttk.Label(right_frame, text="Address:").grid(row=1, column=0, sticky=tk.W)
+        laser_address_label = ttk.Label(right_frame, text="DEMO_LASER::SIMULATED",
+                                       font=('Courier', 9), foreground='purple')
+        laser_address_label.grid(row=1, column=1, sticky=tk.W, padx=(5, 0))
+        
+        ttk.Label(right_frame, text="Status:").grid(row=2, column=0, sticky=tk.W)
+        laser_status_label = ttk.Label(right_frame, text="Connected (Simulated)",
+                                      font=('Arial', 9, 'bold'), foreground='green')
+        laser_status_label.grid(row=2, column=1, sticky=tk.W, padx=(5, 0))
+        
+        ttk.Label(right_frame, text="Device:").grid(row=3, column=0, sticky=tk.W)
+        laser_device_label = ttk.Label(right_frame, text="ITC4001 (M01093719)",
+                                      font=('Arial', 9))
+        laser_device_label.grid(row=3, column=1, sticky=tk.W, padx=(5, 0))
+        
+        # Overall system status (Demo)
+        separator = ttk.Separator(status_header, orient='horizontal')
+        separator.pack(fill=tk.X, pady=(10, 5))
+        
+        system_frame = ttk.Frame(status_header)
+        system_frame.pack(fill=tk.X)
+        
+        ttk.Label(system_frame, text="System Mode:", font=('Arial', 10, 'bold')).pack(side=tk.LEFT)
+        system_mode_label = ttk.Label(system_frame, text="DEMO MODE - All Data Simulated",
+                                     font=('Arial', 10, 'bold'), foreground='purple')
+        system_mode_label.pack(side=tk.LEFT, padx=(5, 0))
     
     def setup_manual_tab(self):
         """Setup the manual control tab."""

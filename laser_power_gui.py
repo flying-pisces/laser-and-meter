@@ -59,6 +59,9 @@ class LaserPowerGUI:
     
     def setup_gui(self):
         """Create the GUI layout."""
+        # Add device status header block
+        self.setup_status_header()
+        
         # Create main notebook for tabs
         notebook = ttk.Notebook(self.root)
         notebook.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
@@ -163,6 +166,74 @@ class LaserPowerGUI:
         
         # Populate table with target currents
         self.populate_sweep_table()
+    
+    def setup_status_header(self):
+        """Setup the device status header block."""
+        # Main status frame
+        status_header = ttk.LabelFrame(self.root, text="Device Status", padding=10)
+        status_header.pack(fill=tk.X, padx=5, pady=5)
+        
+        # Create two-column layout
+        left_frame = ttk.Frame(status_header)
+        left_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        
+        right_frame = ttk.Frame(status_header)
+        right_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True, padx=(20, 0))
+        
+        # Power Meter Status
+        pm_title = ttk.Label(left_frame, text="Power Meter", font=('Arial', 10, 'bold'))
+        pm_title.grid(row=0, column=0, sticky=tk.W, pady=(0, 5))
+        
+        ttk.Label(left_frame, text="Address:").grid(row=1, column=0, sticky=tk.W)
+        self.pm_address_var = tk.StringVar(value="Not Connected")
+        self.pm_address_label = ttk.Label(left_frame, textvariable=self.pm_address_var, 
+                                         font=('Courier', 9), foreground='gray')
+        self.pm_address_label.grid(row=1, column=1, sticky=tk.W, padx=(5, 0))
+        
+        ttk.Label(left_frame, text="Status:").grid(row=2, column=0, sticky=tk.W)
+        self.pm_status_var = tk.StringVar(value="Disconnected")
+        self.pm_status_label = ttk.Label(left_frame, textvariable=self.pm_status_var, 
+                                        font=('Arial', 9, 'bold'))
+        self.pm_status_label.grid(row=2, column=1, sticky=tk.W, padx=(5, 0))
+        
+        ttk.Label(left_frame, text="Device:").grid(row=3, column=0, sticky=tk.W)
+        self.pm_device_var = tk.StringVar(value="--")
+        ttk.Label(left_frame, textvariable=self.pm_device_var, 
+                 font=('Arial', 9)).grid(row=3, column=1, sticky=tk.W, padx=(5, 0))
+        
+        # Laser Status  
+        laser_title = ttk.Label(right_frame, text="Pump Laser", font=('Arial', 10, 'bold'))
+        laser_title.grid(row=0, column=0, sticky=tk.W, pady=(0, 5))
+        
+        ttk.Label(right_frame, text="Address:").grid(row=1, column=0, sticky=tk.W)
+        self.laser_address_var = tk.StringVar(value="Not Connected")
+        self.laser_address_label = ttk.Label(right_frame, textvariable=self.laser_address_var,
+                                           font=('Courier', 9), foreground='gray')
+        self.laser_address_label.grid(row=1, column=1, sticky=tk.W, padx=(5, 0))
+        
+        ttk.Label(right_frame, text="Status:").grid(row=2, column=0, sticky=tk.W)
+        self.laser_status_var = tk.StringVar(value="Disconnected")
+        self.laser_status_label = ttk.Label(right_frame, textvariable=self.laser_status_var,
+                                          font=('Arial', 9, 'bold'))
+        self.laser_status_label.grid(row=2, column=1, sticky=tk.W, padx=(5, 0))
+        
+        ttk.Label(right_frame, text="Device:").grid(row=3, column=0, sticky=tk.W)
+        self.laser_device_var = tk.StringVar(value="--")
+        ttk.Label(right_frame, textvariable=self.laser_device_var,
+                 font=('Arial', 9)).grid(row=3, column=1, sticky=tk.W, padx=(5, 0))
+        
+        # Overall system status
+        separator = ttk.Separator(status_header, orient='horizontal')
+        separator.pack(fill=tk.X, pady=(10, 5))
+        
+        system_frame = ttk.Frame(status_header)
+        system_frame.pack(fill=tk.X)
+        
+        ttk.Label(system_frame, text="System Mode:", font=('Arial', 10, 'bold')).pack(side=tk.LEFT)
+        self.system_mode_var = tk.StringVar(value="Checking Instruments...")
+        self.system_mode_label = ttk.Label(system_frame, textvariable=self.system_mode_var,
+                                          font=('Arial', 10, 'bold'))
+        self.system_mode_label.pack(side=tk.LEFT, padx=(5, 0))
     
     def setup_manual_tab(self):
         """Setup the manual control tab."""
@@ -325,24 +396,64 @@ class LaserPowerGUI:
         """Update instrument status display."""
         # Update power meter status
         if self.power_meter:
-            self.pm_status_var.set(f"Connected - {self.power_meter.sensorName}")
+            # Get the actual device address
+            try:
+                deviceList = ThorlabsPowerMeter.listDevices()
+                if deviceList.resourceCount > 0:
+                    pm_address = deviceList.resourceName[0]
+                    self.pm_address_var.set(pm_address)
+                    self.pm_address_label.configure(foreground='blue')
+                else:
+                    self.pm_address_var.set("Address Unknown")
+                    self.pm_address_label.configure(foreground='orange')
+            except:
+                self.pm_address_var.set("Address Error")
+                self.pm_address_label.configure(foreground='orange')
+            
+            self.pm_status_var.set("Connected")
             self.pm_status_label.configure(foreground='green')
+            self.pm_device_var.set(f"{self.power_meter.sensorName} ({self.power_meter.sensorSerialNumber})")
         else:
+            self.pm_address_var.set("Not Connected")
+            self.pm_address_label.configure(foreground='gray')
             self.pm_status_var.set("Disconnected")
             self.pm_status_label.configure(foreground='red')
+            self.pm_device_var.set("--")
         
         # Update laser status
         if self.laser and self.laser.is_connected:
             try:
+                # Get laser address from resource name
+                self.laser_address_var.set(self.laser.resource_name)
+                self.laser_address_label.configure(foreground='blue')
+                
                 identity = self.laser.get_identity()
-                self.laser_status_var.set(f"Connected - {identity.split(',')[0]}")
+                self.laser_status_var.set("Connected")
                 self.laser_status_label.configure(foreground='green')
-            except:
-                self.laser_status_var.set("Connection Error")
+                self.laser_device_var.set(identity.split(',')[0] + f" ({identity.split(',')[2]})")
+            except Exception as e:
+                self.laser_address_var.set(getattr(self.laser, 'resource_name', 'Address Error'))
+                self.laser_address_label.configure(foreground='orange')
+                self.laser_status_var.set("Communication Error")
                 self.laser_status_label.configure(foreground='orange')
+                self.laser_device_var.set("Error")
         else:
+            self.laser_address_var.set("Not Connected")
+            self.laser_address_label.configure(foreground='gray')
             self.laser_status_var.set("Disconnected")
             self.laser_status_label.configure(foreground='red')
+            self.laser_device_var.set("--")
+        
+        # Update overall system status
+        if self.power_meter and self.laser and self.laser.is_connected:
+            self.system_mode_var.set("PRODUCTION MODE - Real Instruments")
+            self.system_mode_label.configure(foreground='green')
+        elif self.power_meter or (self.laser and self.laser.is_connected):
+            self.system_mode_var.set("PARTIAL CONNECTION - Some Instruments")
+            self.system_mode_label.configure(foreground='orange')
+        else:
+            self.system_mode_var.set("NO INSTRUMENTS - Check Connections")
+            self.system_mode_label.configure(foreground='red')
     
     def connect_power_meter(self):
         """Connect to power meter."""
