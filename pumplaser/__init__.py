@@ -1,3 +1,3 @@
-from .pump_laser import PumpLaser, list_visa_resources
+from .pump_laser import CLD1015, list_visa_resources
 
-__all__ = ['PumpLaser', 'list_visa_resources']
+__all__ = ['CLD1015', 'list_visa_resources']

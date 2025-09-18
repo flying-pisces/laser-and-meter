@@ -1,0 +1,13 @@
+{
+  "credentials": {
+    "api_url": "https://maskhub.psiquantum.com/api",
+    "api_v3_url": "https://maskhub.psiquantum.com/api/v3",
+    "api_token": "your-api-token-here"
+  },
+  "settings": {
+    "timeout": 30,
+    "max_retries": 5,
+    "retry_multiplier": 2,
+    "retry_min_wait": 15
+  }
+}
