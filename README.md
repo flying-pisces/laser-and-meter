@@ -1,35 +1,82 @@
-# Thorlabs Laser Current vs Optical Power Measurement System
+# Thorlabs Laser Control System
 
-A complete automation system for measuring optical power versus pump laser current, featuring both command-line tools and professional GUI interface for Thorlabs instruments.
+A comprehensive Python-based control system for Thorlabs CLD1015 pump lasers with power meter integration and MaskHub data upload capabilities. Features dual laser control, intelligent current selection, and HTTP power meter integration.
 
-## 🎯 Overview
+## 🚀 Key Features
 
-This system provides automated measurement of optical power vs pump laser current with:
-- **28 measurement points** from 130-1480 mA (fully configurable)
-- **Professional GUI interface** with real-time progress tracking
-- **Command-line automation** for scripted operation
-- **Safety features** with emergency stop capabilities
-- **Data export** to CSV for analysis and plotting
+### 🎛️ **Dual Laser Control**
+- **Simultaneous control** of two CLD1015 pump lasers
+- **Real-time monitoring** of current, voltage, and temperature
+- **Safety features** with current limiting and emergency shutdown
+- **Intelligent ramping** for gradual current changes
+
+### 📊 **HTTP Power Meter Integration**
+- **HTTP connectivity** to Thorlabs power meter (IP: 169.254.229.215)
+- **Channel 1 measurements** with real-time readings
+- **Multiple API endpoints** for compatibility
+- **Averaged measurements** for improved accuracy
+
+### 🖥️ **Enhanced GUI Interface**
+- **Three-tab layout**: Device Status, Test Configuration, Results
+- **Smart current selection** with auto-enable/disable logic
+- **Real-time status monitoring** for all devices
+- **Connection testing** with visual indicators
+- **Progress tracking** and detailed logging
+
+### 🌐 **MaskHub Integration**
+- **Real-time data upload** to MaskHub for analysis
+- **Local-only fallback** when cloud unavailable
+- **Comprehensive metadata** capture
+- **Failed upload recovery** with retry logic
+- **Configuration management** for credentials
+
+## 🚀 Quick Start (Enhanced Version)
+
+### 1. Install Dependencies
+```bash
+pip install pyvisa requests tenacity pandas pyarrow
+```
+
+### 2. Launch Enhanced GUI
+```bash
+# Enhanced dual laser GUI with HTTP power meter support
+python enhanced_end_to_end_test_gui.py
+
+# Original GUI (still available)
+python end_to_end_test_gui.py
+```
+
+### 3. Test Device Connections
+1. Go to **Device Status** tab
+2. Click **"Test All Connections"**
+3. Verify laser and power meter connectivity
+
+### 4. Configure and Run Test
+1. Switch to **Test Configuration** tab
+2. Select current levels using smart checkboxes
+3. Configure test parameters and MaskHub settings
+4. Click **"Start Test"** and monitor progress
 
 ## 📁 Project Structure
 
 ```
 thorlabs/
-├── laser_power_gui.py              # Main GUI application (production)
-├── laser_power_gui_demo.py         # Demo GUI (no hardware required)
-├── laser_power_sweep.py            # Automated command-line measurement
-├── laser_power_sweep_test.py       # Command-line test version
-├── integrated_test.py              # System integration verification
-├── test_power_meter.py             # Power meter standalone test
-├── pumplaser/                      # Pump laser control module
-│   ├── pump_laser.py               # PumpLaser driver class
-│   ├── examples/                   # Usage examples and tests
-│   └── requirements.txt            # PyVISA dependencies
-├── Python-Driver-for-Thorlabs-power-meter/  # Power meter module
-│   ├── ThorlabsPowerMeter.py       # Power meter driver
-│   ├── test_setup.py               # Setup verification
-│   └── GlobalLogger/               # Logging system
-└── README*.md                      # Documentation files
+├── enhanced_end_to_end_test_gui.py    # ⭐ Enhanced GUI with dual laser support
+├── end_to_end_test_gui.py             # Original GUI with current selection
+├── simple_end_to_end_test.py          # Command-line test script
+├── maskhub/                           # MaskHub integration package
+│   ├── laser_maskhub_integration.py   # Laser-specific integration
+│   ├── maskhub_service.py            # Core MaskHub API service
+│   └── maskhub_config.py             # Configuration management
+├── pumplaser/                         # Enhanced laser control modules
+│   ├── pump_laser.py                  # Main CLD1015 driver
+│   ├── dual_laser_control_gui.py      # Dual laser GUI reference
+│   └── examples/                      # Usage examples
+├── Python-Driver-for-Thorlabs-power-meter/  # Power meter drivers
+└── docs/                             # Comprehensive documentation
+    ├── END_TO_END_GUI_README.md      # GUI documentation
+    ├── ENHANCED_GUI_FEATURES.md      # Enhanced features guide
+    └── MASKHUB_INTEGRATION_README.md # MaskHub integration guide
 ```
 
 ## 🖥️ GUI Interface (Recommended)
